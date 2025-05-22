@@ -9,3 +9,7 @@
 >
 > * flask (back-end)
 > * nltk (работа с текстом)
+
+## Конфигурация
+
+Скопировать `config-example.json` в `config.json` и изменить `admin-passwd` и `secret-key`.
