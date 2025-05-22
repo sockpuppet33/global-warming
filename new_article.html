@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New article</title>
+</head>
+<body>
+    <form action="{{ url_for('new_article') }}" method="post">
+        <input type="text" name="article_title"><p></p>
+        <textarea name="article_content" id="" cols="30" rows="10"></textarea><p></p>
+        <input type="submit" value="+">
+    </form>
+</body>
+</html>

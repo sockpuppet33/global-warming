@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>articles</title>
+    </head>
+    <body>
+        {% block content %}
+        {% for article in articles %}
+        <a href="/article/{{ article.id }}">{{ article.title }}</a> <i>({{ article.hr_publish_date() }})</i> - {{ article.content[:30] }}...
+        <hr>
+        {% endfor %}
+        {% endblock %}
+    </body>
+</html>

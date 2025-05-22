@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ article.title }}</title>
+    </head>
+    <body>
+        {% block content %}
+        <h1>{{ article.title }}</h1>
+        <p><i>published {{ article.hr_publish_date() }}</i></p>
+        <p>{{ article.content }}</p>
+        {% endblock %}
+    </body>
+</html>
