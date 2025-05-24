@@ -58,7 +58,7 @@ def view_article(id):
 @app.route("/article/<int:id>/summarize")
 def summarize_article(id):
     article = Article.query.get(id)
-    num_sentences = request.args.get("n")
+    num_sentences = int(request.args.get("n"))
     return render_template("summarize.html", text=summarize(article.content, num_sentences))
 
 # admin protected routes
@@ -71,13 +71,13 @@ def admin_login():
         if request.form["password"] == admin_password:
             session["authenticated"] = True
             return redirect(url_for("admin_dashboard"))
-    return render_template("admin_login.html")
+    return render_template("admin/admin_login.html")
 
 @app.route("/admin-dashboard")
 def admin_dashboard():
     if not session.get("authenticated"):
         return redirect(url_for("admin_login"))
-    return render_template("dashboard.html")
+    return render_template("admin/dashboard.html")
 
 @app.route("/admin-new-article", methods=["GET", "POST"])
 def new_article():
@@ -88,7 +88,31 @@ def new_article():
         db.session.add(article)
         db.session.commit()
         return redirect(url_for("list_articles"))
-    return render_template("new_article.html")
+    return render_template("admin/new_article.html")
+
+@app.route("/admin-edit-article/<int:id>", methods=["GET", "POST"])
+def edit_article(id):
+    if not session.get("authenticated"):
+        return redirect(url_for("admin_login"))
+    article = Article.query.filter_by(id=id).first()
+    if request.method == "POST":
+        new_title = request.form["new_title"]
+        new_content = request.form["new_content"]
+        article.title = new_title
+        article.content = new_content
+        db.session.commit()
+        return redirect(url_for("view_article", id=id))
+    return render_template("admin/edit_article.html", article=article, id=id)
+
+@app.route("/admin-delete-article/<int:id>", methods=["GET", "POST"])
+def delete_article(id):
+    if not session.get("authenticated"):
+        return redirect(url_for("admin_login"))
+    if request.method == "POST":
+        Article.query.filter_by(id=id).delete()
+        db.session.commit()
+        return redirect(url_for("list_articles"))
+    return render_template("admin/delete_article.html", id=id)
 
 if __name__ == "__main__":
     app.run(debug=True)
