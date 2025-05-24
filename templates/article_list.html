@@ -2,13 +2,17 @@
 <html>
     <head>
         <title>articles</title>
+        <link rel="stylesheet" href="../static/css/main.css">
     </head>
     <body>
         {% block content %}
-        {% for article in articles %}
-        <a href="/article/{{ article.id }}">{{ article.title }}</a> <i>({{ article.hr_publish_date() }})</i> - {{ article.content[:30] }}...
-        <hr>
-        {% endfor %}
+        <div id="container">
+            {% for article in articles %}
+            <div class="article-card">
+                <a href="/article/{{ article.id }}">{{ article.title }}</a> <i>({{ article.hr_publish_date() }})</i> - {{ article.content[:30] }}...
+            </div>
+            {% endfor %}
+        </div>
         {% endblock %}
     </body>
 </html>

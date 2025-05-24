@@ -2,12 +2,19 @@
 <html>
     <head>
         <title>{{ article.title }}</title>
+        <link rel="stylesheet" href="../static/css/main.css">
     </head>
     <body>
         {% block content %}
+        <div id="container">
         <h1>{{ article.title }}</h1>
         <p><i>published {{ article.hr_publish_date() }}</i></p>
         <p>{{ article.content }}</p>
+        <form method="get" action="{{ url_for('summarize_article', id=article.id) }}">
+            <input type="number" min="5" max="10" name="n">
+            <input type="submit" value="summarize">
+        </form>
+        </div>
         {% endblock %}
     </body>
 </html>
