@@ -1,0 +1,30 @@
+#container {
+    width: 80%;
+    margin: 0 auto;
+    border: 2px solid lightblue;
+    padding: 4px;
+    box-shadow: 2px 2px 2px black;
+    border-radius: 3px;
+    min-height: 85vh;
+    background-color: white;
+}
+
+body {
+    background: linear-gradient(white, lightblue);
+    height: 100vh;
+}
+
+* {
+    font-family: system-ui;
+}
+
+.article-card {
+    border: 1px solid blue;
+    margin-top: 5px;
+    padding: .3em;
+    background-color: #dcf3fc;
+}
+
+.article-card:hover {
+    background-color: #c2eeff;
+}
