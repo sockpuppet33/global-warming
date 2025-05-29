@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>signup</title>
+    <link rel="stylesheet" href="../static/css/main.css">
+</head>
+<body>
+    {% include 'header.html' %}
+    {% block content %}
+    <div id="container">
+        <form action="{{ url_for('signup') }}" method="post">
+            <h1>Sign up</h1>
+            <p class="signup-error">{{ error }}</p>
+            <input type="text" name="username" placeholder="username"><p></p>
+            <input type="password" name="password" placeholder="password"><p></p>
+            <input type="submit" value="Sign up">
+        </form>
+    </div>
+    {% endblock %}
+</body>
+</html>

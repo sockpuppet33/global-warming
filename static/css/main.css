@@ -28,3 +28,20 @@ body {
 .article-card:hover {
     background-color: #c2eeff;
 }
+
+#header a {
+    text-decoration: none;
+    color: blue !important;
+}
+
+#header a:visited {
+    color: inherit;
+}
+
+#header a:hover {
+    font-style: italic;
+}
+
+.signup-error {
+    color: red;
+}

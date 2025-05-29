@@ -6,6 +6,7 @@
     </head>
     <body>
         {% block content %}
+        {% include('header.html') %}
         <div id="container">
             {% for article in articles %}
             <div class="article-card">

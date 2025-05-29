@@ -2,10 +2,13 @@
 
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 from summarizer import summarize
 import json
 import sys
+import user_validator
 
 app = Flask(__name__)
 
@@ -13,6 +16,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///diary.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
 
 # reading config
 
@@ -42,7 +47,20 @@ class Article(db.Model):
     def hr_publish_date(self): # YYYY Mon DD
         return self.publish_date.strftime("%Y %b %d")
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(25), nullable=False)
+    passwd_hash = db.Column(db.String(256), nullable=False)
+
+    def set_pasword(self, password):
+        self.passwd_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.passwd_hash, password)
+
 # routes
+
+# article routes
 
 @app.route("/")
 @app.route("/articles")
@@ -59,7 +77,27 @@ def view_article(id):
 def summarize_article(id):
     article = Article.query.get(id)
     num_sentences = int(request.args.get("n"))
-    return render_template("summarize.html", text=summarize(article.content, num_sentences))
+    return render_template("summarize.html", text=summarize(article.content, num_sentences), article_id=id, article_title=article.title, num_sentences=num_sentences)
+
+# user routes
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        signup_error = ""
+        if not user_validator.validate_username(request.form["username"]):
+            signup_error = "invalid username"
+        elif not user_validator.validate_password(request.form["password"]):
+            signup_error = "weak password"
+        if signup_error:
+            return render_template("signup.html", error=signup_error)
+        else:
+            user = User(name=request.form["username"])
+            user.set_pasword(request.form["password"])
+            db.session.add(user)
+            db.session.commit()
+            return render_template("login.html", after_signup=True)
+    return render_template("signup.html")
 
 # admin protected routes
 
