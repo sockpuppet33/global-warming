@@ -3,6 +3,8 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from sqlalchemy.ext.mutable import MutableList
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from summarizer import summarize
@@ -22,6 +24,7 @@ migrate = Migrate(app, db)
 # reading config
 
 admin_password = None
+quiz = None
 
 with open("./config.json", "r", encoding="utf-8") as config_file:
     config = json.load(config_file)
@@ -32,9 +35,17 @@ with open("./config.json", "r", encoding="utf-8") as config_file:
         print("Unable to read secret key from config")
         sys.exit(1)
 
+with open("./quizconfig.json", "r", encoding="utf-8") as quiz_file:
+    quiz = json.load(quiz_file)
+
 if admin_password is None:
     print("Unable to read admin password from config")
     sys.exit(1)
+
+# login manager
+
+login_manager = LoginManager(app)
+login_manager.login_view = "login";
 
 # models
 
@@ -46,11 +57,17 @@ class Article(db.Model):
 
     def hr_publish_date(self): # YYYY Mon DD
         return self.publish_date.strftime("%Y %b %d")
+    
+    def is_bookmarked(self, user):
+        if not hasattr(user, "bookmarks"):
+            return False
+        return self.id in user.bookmarks
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(25), nullable=False)
     passwd_hash = db.Column(db.String(256), nullable=False)
+    bookmarks = db.Column(MutableList.as_mutable(db.JSON), default=list, nullable=False)
 
     def set_pasword(self, password):
         self.passwd_hash = generate_password_hash(password)
@@ -71,7 +88,7 @@ def list_articles():
 @app.route("/article/<int:id>")
 def view_article(id):
     article = Article.query.get(id)
-    return render_template("article.html", article=article)
+    return render_template("article.html", article=article, is_bookmarked=article.is_bookmarked(current_user))
 
 @app.route("/article/<int:id>/summarize")
 def summarize_article(id):
@@ -96,8 +113,71 @@ def signup():
             user.set_pasword(request.form["password"])
             db.session.add(user)
             db.session.commit()
-            return render_template("login.html", after_signup=True)
+            return redirect(url_for("login"))
     return render_template("signup.html")
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    fail = False
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User.query.filter_by(name=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for("list_articles"))
+        else:
+            fail = True
+    return render_template("login.html", fail=fail)
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("list_articles"))
+
+@app.route("/bookmarks")
+@login_required
+def view_bookmarks():
+    ids = current_user.bookmarks or []
+    if not ids:
+        return render_template("bookmarks.html", bookmarks=[])
+    bookmarks = Article.query.filter(Article.id.in_(ids)).all()
+    print(bookmarks)
+    return render_template("bookmarks.html", bookmarks=bookmarks)
+
+@app.route("/add_bookmark/<int:id>")
+@login_required
+def add_bookmark(id):
+    user = User.query.get(current_user.id)
+    user.bookmarks = user.bookmarks + [id]
+    db.session.commit()
+    article = Article.query.get(id)
+    return render_template("add_bookmark.html", article=article)
+
+@app.route("/del_bookmark/<int:id>")
+@login_required
+def del_bookmark(id):
+    user = User.query.get(current_user.id)
+    if id in user.bookmarks:
+        user.bookmarks.remove(id)
+    db.session.commit()
+    article = Article.query.get(id)
+    return render_template("del_bookmark.html", article=article)
+
+# quiz routes
+
+@app.route("/quiz/<int:q>")
+def quiz_route(q):
+    correct = 0
+    if request.args.get("c") is not None:
+        correct = int(request.args.get("c"))
+    question = quiz["questions"][q]
+    return render_template("quiz.html", qn=q, question=question, correct=correct)
 
 # admin protected routes
 
