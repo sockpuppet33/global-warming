@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>bookmarks</title>
+        <link rel="stylesheet" href="../static/css/main.css">
+    </head>
+    <body>
+		{% import "macro.html" as macro %}
+        {% block content %}
+        {% include('header.html') %}
+        <div id="container">
+            <h1>My bookmarks</h1>
+            {% for article in bookmarks %}
+            {{ macro.article_entry(article, current_user) }}
+            {% endfor %}
+        </div>
+        {% endblock %}
+    </body>
+</html>

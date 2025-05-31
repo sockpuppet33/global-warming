@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Add bookmark</title>
+        <link rel="stylesheet" href="../static/css/main.css">
+    </head>
+    <body>
+		{% import "macro.html" as macro %}
+        {% block content %}
+        {% include('header.html') %}
+        <div id="container">
+			<h1>Bookmark added</h1>
+			<p>Article <i>{{ article.title }}</i> added to bookmarks</p>
+			<a href="{{ url_for('view_article', id=article.id) }}">Back</a>
+        </div>
+        {% endblock %}
+    </body>
+</html>

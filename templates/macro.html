@@ -1,0 +1,5 @@
+{% macro article_entry(article, current_user) %}
+<div class="article-card">
+	{% if article.is_bookmarked(current_user) %}<img src="../static/img/star.png">{% endif %}<a href="/article/{{ article.id }}">{{ article.title }}</a> <i>({{ article.hr_publish_date() }})</i> - {{ article.content[:30] }}...
+</div>
+{% endmacro %}

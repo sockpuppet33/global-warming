@@ -1,4 +1,9 @@
 <div id="header">
-    <a href="{{ url_for('list_articles') }}">Articles</a> / <a href="{{ url_for('signup') }}">Sign up</a>
+    <a href="{{ url_for('list_articles') }}">Articles</a> /
+	{% if current_user.is_authenticated %}
+	Welcome back, {{ current_user.name }} <a href="{{ url_for('view_bookmarks') }}">My bookmarks</a> / <a href="{{ url_for('logout') }}">Log out</a>
+	{% else %}
+    <a href="{{ url_for('signup') }}">Sign up</a> / <a href="{{ url_for('login') }}">Log in</a>
+	{% endif %}
     <hr>
 </div>
